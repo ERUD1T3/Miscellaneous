@@ -57,9 +57,9 @@ void printWorld(int world[SIZE][SIZE]) {
 ushort check_neighbors(int world[SIZE][SIZE], const ushort row, const ushort col) {
     ushort n_live_neighbors = 0, n_dead_neighbors = 0;
     
-    for(ushort i = row-1; i <= row+1; ++i){
+    for(short i = row-1; i <= row+1; ++i){
         if(i < 0 || i > SIZE) continue;
-        for(ushort j = col-1; j <= col+1; ++j) {
+        for(short j = col-1; j <= col+1; ++j) {
             if(j < 0 || j > SIZE) continue;
 
             if(world[i][j] == ALIVE)
