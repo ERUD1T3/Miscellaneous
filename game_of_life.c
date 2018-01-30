@@ -9,14 +9,14 @@ typedef unsigned short ushort;
 
 ushort get_array_size(char *file_name);
 void getWorld(FILE *ifp, int *world, ushort size);
-void printWorld(int *world, ushort size);
-void cell_life(int *world, ushort size, ushort n_gen);
+void printWorld(int *world, ushort size, FILE* ofp);
+void cell_life(int *world, ushort size, ushort n_gen, FILE* ofp);
 ushort check_neighbors(int *world, ushort size, const ushort row, const ushort col);
 
 int main(int argc, char* argv[]) {
     FILE *ifp, *ofp;
     ifp = fopen(argv[1], "r");
-    ofp = fopen("output.txt", "w");
+    ofp = fopen("output.csv", "w");
 
     const ushort size = get_array_size(argv[1]);
     //int world[size][size];
@@ -26,11 +26,11 @@ int main(int argc, char* argv[]) {
     getWorld(ifp,world, size);
     //printf("File name is %s\n", argv[1]);
     //printf("\n");
-    printWorld(world, size);
+    printWorld(world, size, ofp);
     printf("\n");
-    printf("check neighboor at 2 and 5 = %d\n",check_neighbors(world,size, 2, 5));
-    cell_life(world, size, atoi(argv[2]));
-    printWorld(world, size);
+    //printf("check neighboor at 2 and 5 = %d\n\n",check_neighbors(world,size, 2, 5));
+    cell_life(world, size, atoi(argv[2]), ofp);
+    //printWorld(world, size);
 
     fclose(ifp);
     fclose(ofp);
@@ -63,13 +63,15 @@ void getWorld(FILE *ifp, int *world, ushort size) {
     } while(fgetc(ifp) != EOF);
 }
 
-void printWorld(int *world, ushort size) {
+void printWorld(int *world, ushort size, FILE* ofp) {
     for(ushort i = 0; i < size; ++i) {
         for(ushort j = 0; j < size; ++j) {
             //printf("%d ", *(world + i*size + j));
             (*(world + i*size + j))?printf("|O"):printf("| ");
+            (*(world + i*size + j))?fprintf(ofp,"|O"):fprintf(ofp,"| ");
         }
     printf("|\n");
+    fprintf(ofp,"|\n");
     }
 }
 
@@ -77,10 +79,10 @@ ushort check_neighbors(int *world, ushort size, const ushort row, const ushort c
     ushort n_live_neighbors = 0, n_dead_neighbors = 0;
     
     for(short i = row-1; i <= row+1; ++i){
-        if(i < 0 || i > size) continue;
+        if(i < 0 || i >= size) continue;
 
         for(short j = col-1; j <= col+1; ++j) {
-            if(j < 0 || j > size) continue;
+            if(j < 0 || j >= size) continue;
 
             if(*(world + i*size + j) == ALIVE)
                 n_live_neighbors++;
@@ -99,20 +101,25 @@ ushort check_neighbors(int *world, ushort size, const ushort row, const ushort c
     else 
         n_dead_neighbors--;
 
-    return n_live_neighbors*10+n_dead_neighbors;
+    return n_live_neighbors*10+n_dead_neighbors; //num live neigh/num dead neighbor
 }
 
-void cell_life(int *world, ushort size, ushort n_gen) {
+void cell_life(int *world, ushort size, ushort n_gen, FILE* ofp) {
     for(ushort k = 0; k < n_gen; ++k) {
-        for(ushort i = 0; i < size; ++i){
+        for(ushort i = 0; i < size; ++i) {
             for(ushort j = 0; j < size; ++j) {
                 ushort neighb = check_neighbors(world,size, i, j);
                 if(*(world + i*size + j) == ALIVE) 
-                    *(world + i*size + j) = ((neighb/10) == 2 || (neighb/10) == 3)?ALIVE:DEAD;
+                    *(world + i*size + j) = (((int)neighb/10) == 2 || ((int)neighb/10) == 3)?ALIVE:DEAD;
                 else //cell is dead
-                    *(world + i*size + j) = (neighb/10 == 3)?ALIVE:DEAD;  
+                    *(world + i*size + j) = ((int)neighb/10 == 3)?ALIVE:DEAD;  
 
             }
         }
+        printWorld(world, size, ofp);
+        printf("gen: %hu\n\n", k + 1);
+        fprintf(ofp, "gen: %hu\n\n", k + 1);
     }
 }
+
+coded by Josias Moukpe
