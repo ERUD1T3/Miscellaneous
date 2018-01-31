@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 //#define SIZE 6
 #define TOKEN ';'
 #define ALIVE 1
@@ -12,8 +14,10 @@ void getWorld(FILE *ifp, int *world, ushort size);
 void printWorld(int *world, ushort size, FILE* ofp);
 void cell_life(int *world, ushort size, ushort n_gen, FILE* ofp);
 ushort check_neighbors(int *world, ushort size, const ushort row, const ushort col);
+int num_cell_alive(int *world, ushort size);
 
 int main(int argc, char* argv[]) {
+    clock_t start = clock();
     FILE *ifp, *ofp;
     ifp = fopen(argv[1], "r");
     ofp = fopen("output.csv", "w");
@@ -35,6 +39,9 @@ int main(int argc, char* argv[]) {
     fclose(ifp);
     fclose(ofp);
     free(world);
+    clock_t end = clock();
+    double time_p = (double)(end - start)/CLOCKS_PER_SEC;
+    printf("time: %lf\n", time_p);
     return 0;
 }
 
@@ -117,9 +124,22 @@ void cell_life(int *world, ushort size, ushort n_gen, FILE* ofp) {
             }
         }
         printWorld(world, size, ofp);
-        printf("gen: %hu\n\n", k + 1);
-        fprintf(ofp, "gen: %hu\n\n", k + 1);
+        printf("gen: %hu | #alive: %d\n\n", k + 1, num_cell_alive(world, size));
+        fprintf(ofp, "gen: %hu | #alive: %d\n\n", k + 1, num_cell_alive(world, size));
+        for(short i = 0; i < 9999; ++i);
+        system("clear");
     }
 }
 
-coded by Josias Moukpe
+int num_cell_alive(int *world, ushort size) {
+    int n_alive = 0;
+    for(ushort i = 0; i < size; ++i) {
+        for(ushort j = 0; j < size; j++) {
+        if(*(world + i*size + j) == ALIVE)
+            n_alive++;
+        }
+    }
+    return n_alive;
+}
+
+//Coded by Josias
